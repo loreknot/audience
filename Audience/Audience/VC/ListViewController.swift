@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import AVFoundation
+
 
 
 struct MusicData {
@@ -27,16 +29,70 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   
     
     // MARK: - Outlet and variable
+    
     @IBOutlet var playView: UIView!
     @IBOutlet var listTableView: UITableView!
     
     
     var musicInfo: [MusicData] = [MusicData]()
+    let fileManager = FileManager.default
+   
     
     
+    // MARK: - Outlet Action
     
     
-    // MARK: - general func
+    @IBAction func loadMusicList(_ sender: Any) {
+        
+         let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+        
+        do {
+            
+            let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+            
+            for item in items {
+                
+                let url = URL(fileURLWithPath: item)
+                let asset = AVAsset(url: url) as AVAsset
+              
+                var image: UIImage!
+                var titleString: String!
+                var artistString: String!
+                
+                for metaDataItems in asset.commonMetadata {
+        
+                    
+                    if metaDataItems.commonKey?.rawValue == "artwork" {
+                       guard let imageData = metaDataItems.value else {return}
+                        image = UIImage(data: imageData as! Data)!
+                    }
+                    
+                    if metaDataItems.commonKey?.rawValue == "title" {
+                        guard let titleData = metaDataItems.value else {return}
+                        titleString = titleData as? String
+                    }
+                           
+                    if metaDataItems.commonKey?.rawValue == "artist" {
+                        guard let artistData = metaDataItems.value else {return}
+                        artistString = artistData as? String
+                    }
+                    
+                  musicInfo.append(MusicData(cover: image, title: titleString, artist: artistString))
+                }
+                
+                listTableView.reloadData()
+                
+            }
+            
+        } catch {
+            print("Not Found item")
+        }
+        
+        
+    }
+    
+    
+    // MARK: - General func
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,8 +100,10 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         playViewBottomRadi()
         cofigureFileSystem()
         
+        listTableView.delegate = self
+        listTableView.dataSource = self
+        
     
-
     }
 
 
@@ -63,20 +121,20 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     
     func cofigureFileSystem() {
-        let fileManager = FileManager.default
+        
         let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path
-        print(documentsDir)
-        
         do {
-        
-        let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
-        print("Count \(items.count)")
-          for item in items {
-            print("Found \(item)")
-          }
+            
+            let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+            print("Count \(items.count)")
+            for item in items {
+                print("Found \(item)")
+            }
         } catch {
-          print("Not Found item")
+            print("Not Found item")
         }
+        
+        
         
         if fileManager.changeCurrentDirectoryPath(documentsDir) {
             print("Current Path :  \(fileManager.currentDirectoryPath)")
@@ -98,7 +156,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
 //               } catch {
 //                 print("Not Found item")
 //               }
-//
+
     }
     
     
@@ -109,7 +167,15 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        <#code#>
+        let cell = listTableView.dequeueReusableCell(withIdentifier: "listTableViewCell", for: indexPath) as! ListTableViewCell
+        
+        let model = musicInfo[indexPath.row]
+        
+        cell.coverImage.image = model.cover
+        cell.titleLabel.text = model.title
+        cell.artistLabel.text = model.artist
+        
+        return cell
     }
     
   

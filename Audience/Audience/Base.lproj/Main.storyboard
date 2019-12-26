@@ -237,7 +237,7 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Vj6-Wd-emr">
                                 <rect key="frame" x="35" y="90" width="305" height="518"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="70" id="ASZ-sk-JN0" customClass="ListTableViewCell" customModule="Audience" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ListTableViewCell" rowHeight="70" id="ASZ-sk-JN0" customClass="ListTableViewCell" customModule="Audience" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="305" height="70"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ASZ-sk-JN0" id="RPE-fs-BVA">
@@ -327,6 +327,9 @@
                                 </constraints>
                                 <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <state key="normal" backgroundImage="folder.badge.plus" catalog="system"/>
+                                <connections>
+                                    <action selector="loadMusicList:" destination="VcU-LD-vFW" eventType="touchUpInside" id="YAz-cO-jhI"/>
+                                </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Yw6-sa-yzb">
                                 <rect key="frame" x="35" y="608" width="305" height="46.666666666666629"/>
