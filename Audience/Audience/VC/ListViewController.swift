@@ -105,7 +105,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
 // MARK: - TableView Delegate
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        <#code#>
+        musicInfo.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

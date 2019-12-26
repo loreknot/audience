@@ -10,11 +10,16 @@ import UIKit
 
 class ListTableViewCell: UITableViewCell {
 
+    @IBOutlet var coverImage: UIImageView!
+    @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var artistLabel: UILabel!
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
     }
-
+    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 

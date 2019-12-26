@@ -282,6 +282,11 @@
                                                 <constraint firstItem="YkF-Y3-gy6" firstAttribute="centerY" secondItem="RPE-fs-BVA" secondAttribute="centerY" multiplier="0.6" id="w4J-nj-eki"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="artistLabel" destination="emK-wB-jIE" id="WQU-wG-Lbd"/>
+                                            <outlet property="coverImage" destination="8xg-tG-I2d" id="fDh-DJ-IwZ"/>
+                                            <outlet property="titleLabel" destination="YkF-Y3-gy6" id="YVd-ao-Ttk"/>
+                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                                 <sections/>
