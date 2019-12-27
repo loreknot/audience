@@ -44,7 +44,13 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     @IBAction func loadMusicList(_ sender: Any) {
         
+        musicInfo.removeAll()
+        
          let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+        
+        var image: UIImage!
+        var titleString: String!
+        var artistString: String!
         
         do {
             
@@ -55,12 +61,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
                 let url = URL(fileURLWithPath: item)
                 let asset = AVAsset(url: url) as AVAsset
               
-                var image: UIImage!
-                var titleString: String!
-                var artistString: String!
+                print(url)
                 
                 for metaDataItems in asset.commonMetadata {
-        
                     
                     if metaDataItems.commonKey?.rawValue == "artwork" {
                        guard let imageData = metaDataItems.value else {return}
@@ -77,16 +80,17 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
                         artistString = artistData as? String
                     }
                     
-                  musicInfo.append(MusicData(cover: image, title: titleString, artist: artistString))
-                }
+                 }
                 
-                listTableView.reloadData()
-                
+                musicInfo.append(MusicData(cover: image, title: titleString, artist: artistString))
+                            
             }
             
         } catch {
             print("Not Found item")
         }
+        
+         listTableView.reloadData()
         
         
     }
@@ -167,7 +171,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = listTableView.dequeueReusableCell(withIdentifier: "listTableViewCell", for: indexPath) as! ListTableViewCell
+        let cell = listTableView.dequeueReusableCell(withIdentifier: "ListTableViewCell", for: indexPath) as! ListTableViewCell
         
         let model = musicInfo[indexPath.row]
         
