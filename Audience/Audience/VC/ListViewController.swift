@@ -16,27 +16,30 @@ struct MusicData {
     var cover: UIImage?
     var title: String?
     var artist: String?
+    var musicName: String?
     
-    init(cover: UIImage?, title: String?, artist: String?) {
+    init(cover: UIImage?, title: String?, artist: String?, musicName: String?) {
         self.cover = cover
         self.title = title
         self.artist = artist
-       }
+        self.musicName = musicName
+    }
 }
 
 
+
+
 class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataSource {
-  
-    
     // MARK: - Outlet and variable
     
     @IBOutlet var playView: UIView!
     @IBOutlet var listTableView: UITableView!
     
-    
+    var musicPlayer: AVAudioPlayer?
     var musicInfo: [MusicData] = [MusicData]()
+    
+    
     let fileManager = FileManager.default
-   
     
     
     // MARK: - Outlet Action
@@ -44,55 +47,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     @IBAction func loadMusicList(_ sender: Any) {
         
-        musicInfo.removeAll()
-        
-         let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path
-        
-        var image: UIImage!
-        var titleString: String!
-        var artistString: String!
-        
-        do {
-            
-            let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
-            
-            for item in items {
-                
-                let url = URL(fileURLWithPath: item)
-                let asset = AVAsset(url: url) as AVAsset
-              
-                print(url)
-                
-                for metaDataItems in asset.commonMetadata {
-                    
-                    if metaDataItems.commonKey?.rawValue == "artwork" {
-                       guard let imageData = metaDataItems.value else {return}
-                        image = UIImage(data: imageData as! Data)!
-                    }
-                    
-                    if metaDataItems.commonKey?.rawValue == "title" {
-                        guard let titleData = metaDataItems.value else {return}
-                        titleString = titleData as? String
-                    }
-                           
-                    if metaDataItems.commonKey?.rawValue == "artist" {
-                        guard let artistData = metaDataItems.value else {return}
-                        artistString = artistData as? String
-                    }
-                    
-                 }
-                
-                musicInfo.append(MusicData(cover: image, title: titleString, artist: artistString))
-                            
-            }
-            
-        } catch {
-            print("Not Found item")
-        }
-        
-         listTableView.reloadData()
-        
-        
+       
     }
     
     
@@ -107,7 +62,12 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         listTableView.delegate = self
         listTableView.dataSource = self
         
+    }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(false)
+        
+        loadMusicList()
     }
 
 
@@ -127,48 +87,105 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     func cofigureFileSystem() {
         
         let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+        
         do {
-            
             let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
-            print("Count \(items.count)")
             for item in items {
-                print("Found \(item)")
+                print("Found : \(item)")
             }
         } catch {
             print("Not Found item")
         }
-        
-        
         
         if fileManager.changeCurrentDirectoryPath(documentsDir) {
             print("Current Path :  \(fileManager.currentDirectoryPath)")
         } else {
             print("Fail")
         }
+    }
+    
+    func playMusic(url: URL) {
         
-//        let fileManager = FileManager.default
-//               do {
-//               //도큐멘트 파일 경로를 가져옵니다.
-//               let destPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
-//
-//               // 접근한 경로의 디렉토리 내 파일 리스트를 불러옵니다.
-//               let items = try fileManager.contentsOfDirectory(atPath: destPath)
-//               print("Count \(items.count)")
-//                 for item in items {
-//                   print("Found \(item)")
-//                 }
-//               } catch {
-//                 print("Not Found item")
-//               }
+        do {
+            musicPlayer = try AVAudioPlayer(contentsOf: url)
+            print(url)
+            musicPlayer?.prepareToPlay()
+            musicPlayer?.volume = 1.0
+            musicPlayer?.play()
+            
+        } catch {
+        }
+        
+       do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowAirPlay])
+            print("Playback OK")
+            try AVAudioSession.sharedInstance().setActive(true)
+            print("Session is Active")
+        } catch {
+            print(error)
+        }
+    }
+    
+    func loadMusicList() {
+        
+         musicInfo.removeAll()
+                
+                let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+                
+                var image: UIImage!
+                //var titleString: String!
+                var artistString: String!
+                var musicName: String!
+                
+                do {
+                    let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+                    
+                    for item in items {
+                        
+                        let url = URL(fileURLWithPath: item)
+                        let asset = AVAsset(url: url) as AVAsset
+                        musicName = item
+                        
+                        // artwork image 얻기
+                        let meta = asset.commonMetadata.filter { $0.commonKey?.rawValue == "artwork"}
+                        if meta.count > 0 {
+                            let imageData = meta[0].value
+                            image = UIImage(data: imageData as! Data)
+                        } else {
+                            image = UIImage(named: "noImage")
+                        }
+                            
+                         for metaDataItems in asset.commonMetadata {
+        //                    if metaDataItems.commonKey?.rawValue == "title" {
+        //                        guard let titleData = metaDataItems.value else {return}
+        //                        titleString = titleData as? String
+        //                    }
+                            if metaDataItems.commonKey?.rawValue == "artist" {
+                                guard let artistData = metaDataItems.value else {return}
+                                artistString = artistData as? String
+                            }
+                         }
+                        musicInfo.append(MusicData(cover: image, title: musicName, artist: artistString, musicName: musicName))
+                        
+                    }
+                    
+                } catch {
+                    print("Not Found item")
+                }
+                musicInfo.reverse()
+                listTableView.reloadData()
 
     }
     
     
 // MARK: - TableView Delegate
     
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         musicInfo.count
     }
+    
+    
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = listTableView.dequeueReusableCell(withIdentifier: "ListTableViewCell", for: indexPath) as! ListTableViewCell
@@ -182,8 +199,21 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         return cell
     }
     
-  
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
+        let musicFile = musicInfo[indexPath.row].musicName
+        var musicURL: URL?
+        
+        if let documentPath: URL = documentsDir.first {
+            let musicPath = documentPath.appendingPathComponent(musicFile!)
+            musicURL = musicPath
+            
+            playMusic(url: musicURL!)
+        }
+        
+    }
     
     
     
