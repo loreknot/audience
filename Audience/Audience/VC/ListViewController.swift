@@ -32,22 +32,53 @@ struct MusicData {
 class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataSource {
     // MARK: - Outlet and variable
     
-    @IBOutlet var playView: UIView!
+
     @IBOutlet var listTableView: UITableView!
+    
+    @IBOutlet var playView: UIView!
+    @IBOutlet var playButton: UIButton!
+    
     
     var musicPlayer: AVAudioPlayer?
     var musicInfo: [MusicData] = [MusicData]()
+    var musicURL: URL?
     
+    var nowPlaying = false
+    var musicChoice = false
+    var nextRow: Int?
     
     let fileManager = FileManager.default
     
     
     // MARK: - Outlet Action
     
-    
-    @IBAction func loadMusicList(_ sender: Any) {
+    @IBAction func tapPlayButton(_ sender: Any) {
         
-       
+        if musicChoice && nowPlaying {
+            
+            playButton.setBackgroundImage(UIImage(systemName: "play.fill"), for: .normal)
+            musicPlayer?.pause()
+            nowPlaying = false
+        
+        } else {
+         
+            guard musicChoice else {return}
+            playMusic(url: musicURL!)
+            playButton.setBackgroundImage(UIImage(systemName: "pause.fill"), for: .normal)
+            nowPlaying = true
+            
+        }
+    }
+    
+    
+    @IBAction func nextButton(_ sender: Any) {
+        
+        
+        
+        guard musicChoice else {return}
+        listTableView.selectRow(at: IndexPath(row: 0, section: 0), animated: true, scrollPosition: .top)
+        
+    
     }
     
     
@@ -75,7 +106,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         
         let path = UIBezierPath(roundedRect:playView.bounds,
                                       byRoundingCorners:[.bottomLeft, .bottomRight],
-                                      cornerRadii: CGSize(width: 10, height:  10))
+                                      cornerRadii: CGSize(width: 7, height:  7))
 
               let maskLayer = CAShapeLayer()
 
@@ -104,6 +135,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         }
     }
     
+    
     func playMusic(url: URL) {
         
         do {
@@ -116,15 +148,16 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         } catch {
         }
         
-       do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowAirPlay])
-            print("Playback OK")
-            try AVAudioSession.sharedInstance().setActive(true)
-            print("Session is Active")
-        } catch {
-            print(error)
-        }
+//       do {
+//            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .allowAirPlay])
+//            print("Playback OK")
+//            try AVAudioSession.sharedInstance().setActive(true)
+//            print("Session is Active")
+//        } catch {
+//            print(error)
+//        }
     }
+    
     
     func loadMusicList() {
         
@@ -204,13 +237,19 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         
         let documentsDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
         let musicFile = musicInfo[indexPath.row].musicName
-        var musicURL: URL?
         
         if let documentPath: URL = documentsDir.first {
             let musicPath = documentPath.appendingPathComponent(musicFile!)
             musicURL = musicPath
             
             playMusic(url: musicURL!)
+            nowPlaying = true
+            musicChoice = true
+        }
+        
+        if nowPlaying == true {
+            playButton.setBackgroundImage(UIImage(systemName: "pause.fill"), for: .normal)
+            
         }
         
     }

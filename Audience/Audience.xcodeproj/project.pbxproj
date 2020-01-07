@@ -16,6 +16,7 @@
 		335E2E57239A3B9C002C7BD1 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335E2E56239A3B9C002C7BD1 /* ListViewController.swift */; };
 		3365433E23B1F23300DE1873 /* ListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3365433D23B1F23300DE1873 /* ListTableViewCell.swift */; };
 		33681B6823B055990015BD6B /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33681B6723B055990015BD6B /* Extension.swift */; };
+		336BD1F023BEDEDE0076C723 /* UserDefaultManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 336BD1EF23BEDEDE0076C723 /* UserDefaultManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		3365433D23B1F23300DE1873 /* ListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTableViewCell.swift; sourceTree = "<group>"; };
 		33681B6523B04F150015BD6B /* Audience.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Audience.entitlements; sourceTree = "<group>"; };
 		33681B6723B055990015BD6B /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
+		336BD1EF23BEDEDE0076C723 /* UserDefaultManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,13 +67,13 @@
 			children = (
 				33681B6523B04F150015BD6B /* Audience.entitlements */,
 				3364CEB72398DA2E00E1CF5D /* VC */,
+				33681B6623B0556A0015BD6B /* Extensions */,
 				3356F47C2385086A00627D0B /* AppDelegate.swift */,
 				3356F47E2385086A00627D0B /* SceneDelegate.swift */,
 				3356F4822385086A00627D0B /* Main.storyboard */,
 				3356F4852385087000627D0B /* Assets.xcassets */,
 				3356F4872385087000627D0B /* LaunchScreen.storyboard */,
 				3356F48A2385087000627D0B /* Info.plist */,
-				33681B6623B0556A0015BD6B /* Extensions */,
 			);
 			path = Audience;
 			sourceTree = "<group>";
@@ -90,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				33681B6723B055990015BD6B /* Extension.swift */,
+				336BD1EF23BEDEDE0076C723 /* UserDefaultManager.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -171,6 +174,7 @@
 				3356F47F2385086A00627D0B /* SceneDelegate.swift in Sources */,
 				335E2E57239A3B9C002C7BD1 /* ListViewController.swift in Sources */,
 				3365433E23B1F23300DE1873 /* ListTableViewCell.swift in Sources */,
+				336BD1F023BEDEDE0076C723 /* UserDefaultManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
