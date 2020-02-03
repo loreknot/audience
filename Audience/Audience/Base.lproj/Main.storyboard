@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="rgI-be-jWG">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="rgI-be-jWG">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -312,7 +312,7 @@
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Not playing" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5oz-T6-sfh">
-                                        <rect key="frame" x="78" y="17" width="120" height="22"/>
+                                        <rect key="frame" x="78" y="17" width="116.66666666666669" height="22"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -354,7 +354,7 @@
                                     <constraint firstItem="5oz-T6-sfh" firstAttribute="leading" secondItem="EQK-NM-tvj" secondAttribute="trailing" constant="18" id="XO1-Eh-LTf"/>
                                     <constraint firstAttribute="bottom" secondItem="EQK-NM-tvj" secondAttribute="bottom" constant="6.6666666666666288" id="bKf-Bi-SGL"/>
                                     <constraint firstItem="3Yk-Fk-biy" firstAttribute="leading" secondItem="eie-fr-3SG" secondAttribute="trailing" constant="16.333333333333314" id="erk-zd-vth"/>
-                                    <constraint firstItem="eie-fr-3SG" firstAttribute="leading" secondItem="5oz-T6-sfh" secondAttribute="trailing" constant="16.666666666666657" id="gIf-0I-31P"/>
+                                    <constraint firstItem="eie-fr-3SG" firstAttribute="leading" secondItem="5oz-T6-sfh" secondAttribute="trailing" constant="20" id="gIf-0I-31P"/>
                                     <constraint firstItem="EQK-NM-tvj" firstAttribute="top" secondItem="Yw6-sa-yzb" secondAttribute="top" constant="5" id="hbA-hT-IjV"/>
                                 </constraints>
                             </view>
@@ -395,9 +395,15 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="LIST" image="folder.fill" catalog="system" id="gkN-xa-fUi"/>
                     <connections>
+                        <outlet property="imageViewLastConstraint" destination="gIf-0I-31P" id="nqd-kl-5mO"/>
+                        <outlet property="imageViewLeftConstraint" destination="XIh-ev-xRv" id="sQ9-aT-vtm"/>
+                        <outlet property="imageViewRightConstraint" destination="XO1-Eh-LTf" id="RnW-Qm-luR"/>
                         <outlet property="listTableView" destination="Vj6-Wd-emr" id="QGm-iA-mcM"/>
                         <outlet property="playButton" destination="eie-fr-3SG" id="J4Y-x2-rOO"/>
                         <outlet property="playView" destination="Yw6-sa-yzb" id="opy-KV-542"/>
+                        <outlet property="playViewCoverImage" destination="EQK-NM-tvj" id="VRa-y4-haw"/>
+                        <outlet property="playViewLabel" destination="5oz-T6-sfh" id="OxI-wJ-NDv"/>
+                        <outlet property="test" destination="bPS-ME-l1Z" id="9X6-Ol-5hi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="CbO-od-ZNz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
