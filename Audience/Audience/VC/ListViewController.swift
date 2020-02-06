@@ -27,6 +27,22 @@ struct MusicData {
 }
 
 
+struct MusicDataForSave {
+
+    var cover: String?
+    var title: String?
+    var artist: String?
+    var musicName: String?
+    
+    init(cover: String?, title: String?, artist: String?, musicName: String?) {
+        self.cover = cover
+        self.title = title
+        self.artist = artist
+        self.musicName = musicName
+    }
+}
+
+
 
 
 class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataSource {
@@ -52,6 +68,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   
   var musicPlayer: AVAudioPlayer?
   var musicInfo = [MusicData]()
+  
   var musicURL: URL?
   var nextMusicURL: URL?
   
@@ -60,10 +77,34 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   var nowPlaying = false
   var choiceMusic = false
   var selectedRow: Int?
+  var playVC: PlayViewController?
 
   let fileManager = FileManager.default
   
+  // MARK: - Cycle
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
     
+    playViewBottomRadi()
+    cofigureFileSystem()
+    
+    listTableView.delegate = self
+    listTableView.dataSource = self
+    
+    setNotPlayingLabel()
+    
+    playVC = self.tabBarController?.viewControllers![0] as? PlayViewController
+    
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(false)
+    
+    loadMusicList()
+  }
+  
+  
   // MARK: - Outlet Action
   
   @IBAction func tapPlayButton(_ sender: Any) {
@@ -81,6 +122,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     } else {
       
       guard choiceMusic else {return}
+      
       musicPlayer?.play()
       playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
                                     for: .normal)
@@ -97,6 +139,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   @IBAction func nextButton(_ sender: Any) {
     
     guard choiceMusic else {return}
+    
     
     if selectedRow! == musicInfo.count - 1 {
       selectedRow = -1
@@ -116,7 +159,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     let nextMusicFile = musicInfo[selectedRow!].musicName
     let nextMusicCover = musicInfo[selectedRow!].cover
-    
+
     if let documentPath: URL = documentsDir.first {
       let nextMusicPath = documentPath.appendingPathComponent(nextMusicFile!)
       
@@ -134,36 +177,22 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         
         musicName = nextMusicFile
         playViewCoverImage.image = nextMusicCover
-        
-//        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
-//                                      for: .normal)
+    
+        playMusic(url: nextMusicURL!)
+        musicPlayer?.stop()
+        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
+        //                                      for: .normal)
       }
       
     }
     
   }
+  @IBAction func TapEditButton(_ sender: Any) {
+    listTableView.isEditing = !listTableView.isEditing
+  }
   
   
   // MARK: - func
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    playViewBottomRadi()
-    cofigureFileSystem()
-    
-    listTableView.delegate = self
-    listTableView.dataSource = self
-    
-    setNotPlayingLabel()
-    
-  }
-  
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(false)
-    
-    loadMusicList()
-  }
   
   
   func playViewBottomRadi() {
@@ -183,7 +212,6 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     let documentsDir = fileManager.urls(for: .documentDirectory,
                                         in: .userDomainMask)[0].path
-    
     do {
       let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
       for item in items {
@@ -205,7 +233,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     do {
       musicPlayer = try AVAudioPlayer(contentsOf: url)
-      print(url)
+  
       musicPlayer?.prepareToPlay()
       musicPlayer?.play()
       
@@ -226,58 +254,115 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   
   func loadMusicList() {
     
-    musicInfo.removeAll()
-    
     let documentsDir = fileManager.urls(for: .documentDirectory,
                                         in: .userDomainMask)[0].path
-    
     var image: UIImage!
     //var titleString: String!
     var artistString: String!
     var musicName: String!
     
-    do {
-      let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+    if UserDefaultManager.getMusicList()!.isEmpty {
       
-      for item in items {
-        
-        let url = URL(fileURLWithPath: item)
-        let asset = AVAsset(url: url) as AVAsset
+      musicInfo.removeAll()
+
+        do {
+          let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+          
+          for item in items {
+            musicName = item
+            
+            let url = URL(fileURLWithPath: item)
+            let asset = AVAsset(url: url) as AVAsset
+           
+            // artwork image 얻기
+            let meta = asset.commonMetadata.filter
+            { $0.commonKey?.rawValue == "artwork"}
+            
+            if meta.count > 0 {
+              let imageData = meta[0].value
+              image = UIImage(data: imageData as! Data)
+            } else {
+              image = UIImage(named: "noImage")
+            }
+            
+            for metaDataItems in asset.commonMetadata {
+              //                    if metaDataItems.commonKey?.rawValue == "title" {
+              //                        guard let titleData = metaDataItems.value else {return}
+              //                        titleString = titleData as? String
+              //                    }
+              if metaDataItems.commonKey?.rawValue == "artist" {
+                guard let artistData = metaDataItems.value else {return}
+                artistString = artistData as? String
+                
+              }
+            }
+            musicInfo.append(MusicData(cover: image,
+                                       title: musicName,
+                                       artist: artistString,
+                                       musicName: musicName))
+          }
+          
+        } catch {
+          print("Not Found item")
+        }
+        listTableView.reloadData()
+      
+    } else {
+      
+      musicInfo.removeAll()
+      let list = UserDefaultManager.getMusicList()
+      
+      for item in list! {
         musicName = item
         
-        // artwork image 얻기
-        let meta = asset.commonMetadata.filter
-        { $0.commonKey?.rawValue == "artwork"}
-        
-        if meta.count > 0 {
-          let imageData = meta[0].value
-          image = UIImage(data: imageData as! Data)
-        } else {
-          image = UIImage(named: "noImage")
-        }
-        
-        for metaDataItems in asset.commonMetadata {
-          //                    if metaDataItems.commonKey?.rawValue == "title" {
-          //                        guard let titleData = metaDataItems.value else {return}
-          //                        titleString = titleData as? String
-          //                    }
-          if metaDataItems.commonKey?.rawValue == "artist" {
-            guard let artistData = metaDataItems.value else {return}
-            artistString = artistData as? String
+        do {
+          let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+          
+          for name in items {
+            if musicName == name {
+              
+              let url = URL(fileURLWithPath: musicName)
+              let asset = AVAsset(url: url) as AVAsset
+              
+              let meta = asset.commonMetadata.filter
+              { $0.commonKey?.rawValue == "artwork"}
+              
+              if meta.count > 0 {
+                let imageData = meta[0].value
+                image = UIImage(data: imageData as! Data)
+              } else {
+                image = UIImage(named: "noImage")
+              }
+              
+              for metaDataItems in asset.commonMetadata {
+                //                    if metaDataItems.commonKey?.rawValue == "title" {
+                //                        guard let titleData = metaDataItems.value else {return}
+                //                        titleString = titleData as? String
+                //                    }
+                if metaDataItems.commonKey?.rawValue == "artist" {
+                  guard let artistData = metaDataItems.value else {return}
+                  artistString = artistData as? String
+                  
+                }
+              }
+              
+              musicInfo.append(MusicData(cover: image,
+              title: musicName,
+              artist: artistString,
+              musicName: musicName))
+              
+            }
           }
+         
+        } catch {
+          print("not Found item")
         }
-        musicInfo.append(MusicData(cover: image,
-                                   title: musicName,
-                                   artist: artistString,
-                                   musicName: musicName))
-        
+        listTableView.reloadData()
       }
       
-    } catch {
-      print("Not Found item")
+      
     }
-    musicInfo.reverse()
-    listTableView.reloadData()
+  
     
   }
   
@@ -293,17 +378,17 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   func setNowPlayingAnimation() {
     
     UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 1, initialSpringVelocity: 20.0, options: .curveEaseInOut, animations: {
-        
+      
       self.imageViewLeftConstraint.constant = self.imageViewLeftConstraint.constant - 30
       self.imageViewRightConstraint.constant = self.imageViewRightConstraint.constant - 30
-    
+      
       self.view.layoutIfNeeded()
-        
-      }, completion: nil)
+      
+    }, completion: nil)
     
     if nowPlaying {
       UIView.animate(withDuration: 1.0, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 20.0, options: .curveEaseInOut, animations: {
-          
+        
         self.imageViewLeftConstraint.constant = self.imageViewLeftConstraint.constant + 30
         self.imageViewRightConstraint.constant = self.imageViewRightConstraint.constant + 30
         self.imageViewLastConstraint.constant = 5
@@ -311,23 +396,23 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         self.view.layoutIfNeeded()
         self.playViewCoverImage.isHidden = false
         
-        }, completion: nil)
+      }, completion: nil)
       
       
       
     } else {
       UIView.animate(withDuration: 1.0, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 20.0, options: .curveEaseInOut, animations: {
-            
-            self.imageViewLeftConstraint.constant = self.imageViewLeftConstraint.constant + 60
-             self.imageViewRightConstraint.constant = self.imageViewRightConstraint.constant + 60
-             self.imageViewLastConstraint.constant = 0
-           
-             self.view.layoutIfNeeded()
-             self.playViewCoverImage.isHidden = false
         
-             }, completion: nil)
+        self.imageViewLeftConstraint.constant = self.imageViewLeftConstraint.constant + 60
+        self.imageViewRightConstraint.constant = self.imageViewRightConstraint.constant + 60
+        self.imageViewLastConstraint.constant = 0
+        
+        self.view.layoutIfNeeded()
+        self.playViewCoverImage.isHidden = false
+        
+      }, completion: nil)
       
-       nowPlaying = true
+      nowPlaying = true
     }
     
     
@@ -339,7 +424,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       self.imageViewLeftConstraint.constant = self.imageViewLeftConstraint.constant + 30
       self.imageViewRightConstraint.constant = self.imageViewRightConstraint.constant + 30
       self.imageViewLastConstraint.constant = 0
-
+      
       self.playViewCoverImage.isHidden = false
       self.view.layoutIfNeeded()
       
@@ -370,12 +455,12 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
                  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = listTableView.dequeueReusableCell(withIdentifier: "ListTableViewCell",
                                                  for: indexPath) as! ListTableViewCell
-    
-    let model = musicInfo[indexPath.row]
-    
-    cell.coverImage.image = model.cover
-    cell.titleLabel.text = model.title
-    cell.artistLabel.text = model.artist
+      
+      let model = musicInfo[indexPath.row]
+      
+      cell.coverImage.image = model.cover
+      cell.titleLabel.text = model.title
+      cell.artistLabel.text = model.artist
     
     return cell
   }
@@ -391,6 +476,10 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     playViewLabel.text = musicFile.musicName
     playViewCoverImage.image = musicFile.cover
     
+    playVC?.coverImage.image = musicFile.cover
+    playVC?.artistLabel.text = musicFile.artist
+    playVC?.titleLabel.text = musicFile.title
+    
     if let documentPath: URL = documentsDir.first {
       let musicPath = documentPath.appendingPathComponent(musicFile.musicName!)
       musicURL = musicPath
@@ -402,11 +491,37 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       
     }
     playButton.setBackgroundImage(UIImage(systemName: "pause.fill"), for: .normal)
-   
+    
     setNowPlayingAnimation()
     
-    
   }
+  
+  
+  func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+    return true
+  }
+  
+  func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+    
+    
+    let itemToMove = musicInfo[sourceIndexPath.row]
+    musicInfo.remove(at: sourceIndexPath.row)
+    musicInfo.insert(itemToMove, at: destinationIndexPath.row)
+    
+    //    let musicDataForSave = musicInfo.map { (mus) -> MusicDataForSave in
+    //      let coverstring = mus.cover?.toString()
+    //      return MusicDataForSave(cover: coverstring, title: mus.title, artist: mus.artist, musicName: mus.musicName)
+    
+    var musicNameForSave = [String]()
+    let data = musicInfo.map { (info) -> String in
+      return info.musicName!
+    }
+    
+    
+    musicNameForSave = data
+    UserDefaultManager.saveMusicList(musicNameForSave)
+  }
+  
   
   
   
