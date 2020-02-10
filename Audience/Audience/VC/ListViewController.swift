@@ -12,37 +12,19 @@ import AVFoundation
 
 
 struct MusicData {
-
-    var cover: UIImage?
-    var title: String?
-    var artist: String?
-    var musicName: String?
-    
-    init(cover: UIImage?, title: String?, artist: String?, musicName: String?) {
-        self.cover = cover
-        self.title = title
-        self.artist = artist
-        self.musicName = musicName
-    }
+  
+  var cover: UIImage?
+  var title: String?
+  var artist: String?
+  var musicName: String?
+  
+  init(cover: UIImage?, title: String?, artist: String?, musicName: String?) {
+    self.cover = cover
+    self.title = title
+    self.artist = artist
+    self.musicName = musicName
+  }
 }
-
-
-struct MusicDataForSave {
-
-    var cover: String?
-    var title: String?
-    var artist: String?
-    var musicName: String?
-    
-    init(cover: String?, title: String?, artist: String?, musicName: String?) {
-        self.cover = cover
-        self.title = title
-        self.artist = artist
-        self.musicName = musicName
-    }
-}
-
-
 
 
 class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataSource {
@@ -73,6 +55,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   var nextMusicURL: URL?
   
   var musicName: String?
+  var forPlayMusicFile: MusicData?
   
   var nowPlaying = false
   var choiceMusic = false
@@ -113,11 +96,11 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       
       playButton.setBackgroundImage(UIImage(systemName: "play.fill"),
                                     for: .normal)
+      playVC?.playButton.setBackgroundImage(UIImage(systemName: "play.circle.fill"),
+              for: .normal)
       musicPlayer?.pause()
       nowPlaying = false
       setNotPlayingViewAnimation()
-      
-      
       
     } else {
       
@@ -126,6 +109,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       musicPlayer?.play()
       playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
                                     for: .normal)
+      playVC?.playButton.setBackgroundImage(UIImage(systemName: "pause.circle.fill"),
+         for: .normal)
+      
       setNowPlayingAnimation()
       
       if let name = musicName {
@@ -157,11 +143,14 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     let documentsDir = fileManager.urls(for: .documentDirectory,
                                         in: .userDomainMask)
     
-    let nextMusicFile = musicInfo[selectedRow!].musicName
+    let nextMusicFile = musicInfo[selectedRow!]
+    let nextMusicName = musicInfo[selectedRow!].musicName
     let nextMusicCover = musicInfo[selectedRow!].cover
+    
+    toPlayView(nextMusicFile)
 
     if let documentPath: URL = documentsDir.first {
-      let nextMusicPath = documentPath.appendingPathComponent(nextMusicFile!)
+      let nextMusicPath = documentPath.appendingPathComponent(nextMusicName!)
       
       nextMusicURL = nextMusicPath
       
@@ -170,12 +159,12 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         playMusic(url: nextMusicURL!)
         
         setNowPlayingAnimation()
-        playViewLabel.text = nextMusicFile
+        playViewLabel.text = nextMusicName
         playViewCoverImage.image = nextMusicCover
         
       } else {
         
-        musicName = nextMusicFile
+        musicName = nextMusicName
         playViewCoverImage.image = nextMusicCover
     
         playMusic(url: nextMusicURL!)
@@ -260,7 +249,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     //var titleString: String!
     var artistString: String!
     var musicName: String!
-    
+
     if UserDefaultManager.getMusicList()!.isEmpty {
       
       musicInfo.removeAll()
@@ -273,7 +262,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
             
             let url = URL(fileURLWithPath: item)
             let asset = AVAsset(url: url) as AVAsset
-           
+            
             // artwork image 얻기
             let meta = asset.commonMetadata.filter
             { $0.commonKey?.rawValue == "artwork"}
@@ -358,7 +347,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
           print("not Found item")
         }
         listTableView.reloadData()
-      }
+        }
       
       
     }
@@ -441,6 +430,14 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     }, completion: nil)
   }
   
+  func toPlayView(_ musicData: MusicData) {
+    
+    playVC?.coverImage.image = musicData.cover
+    playVC?.artistLabel.text = musicData.artist
+    playVC?.titleLabel.text = musicData.title
+    
+  }
+  
   
   // MARK: - TableView Delegate
   
@@ -476,9 +473,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     playViewLabel.text = musicFile.musicName
     playViewCoverImage.image = musicFile.cover
     
-    playVC?.coverImage.image = musicFile.cover
-    playVC?.artistLabel.text = musicFile.artist
-    playVC?.titleLabel.text = musicFile.title
+    toPlayView(musicFile)
+    playVC?.playButton.setBackgroundImage(UIImage(systemName: "pause.circle.fill"),
+    for: .normal)
     
     if let documentPath: URL = documentsDir.first {
       let musicPath = documentPath.appendingPathComponent(musicFile.musicName!)
@@ -493,7 +490,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     playButton.setBackgroundImage(UIImage(systemName: "pause.fill"), for: .normal)
     
     setNowPlayingAnimation()
-    
+  
   }
   
   
@@ -508,13 +505,13 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     musicInfo.remove(at: sourceIndexPath.row)
     musicInfo.insert(itemToMove, at: destinationIndexPath.row)
     
-    //    let musicDataForSave = musicInfo.map { (mus) -> MusicDataForSave in
-    //      let coverstring = mus.cover?.toString()
-    //      return MusicDataForSave(cover: coverstring, title: mus.title, artist: mus.artist, musicName: mus.musicName)
-    
     var musicNameForSave = [String]()
     let data = musicInfo.map { (info) -> String in
       return info.musicName!
+      
+      //    let musicDataForSave = musicInfo.map { (mus) -> MusicDataForSave in
+      //      let coverstring = mus.cover?.toString()
+      //      return MusicDataForSave(cover: coverstring, title: mus.title, artist: mus.artist, musicName: mus.musicName)
     }
     
     
