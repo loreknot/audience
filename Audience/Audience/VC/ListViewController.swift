@@ -250,105 +250,121 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     var artistString: String!
     var musicName: String!
 
-    if UserDefaultManager.getMusicList()!.isEmpty {
+    if let list = UserDefaultManager.getMusicList() {
       
-      musicInfo.removeAll()
-
-        do {
-          let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+      if list.isEmpty {
+        
+      } else {
+        
+        musicInfo.removeAll()
+        let list = UserDefaultManager.getMusicList()
+        
+        for item in list! {
+          musicName = item
           
-          for item in items {
-            musicName = item
+          do {
+            let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
             
-            let url = URL(fileURLWithPath: item)
-            let asset = AVAsset(url: url) as AVAsset
-            
-            // artwork image 얻기
-            let meta = asset.commonMetadata.filter
-            { $0.commonKey?.rawValue == "artwork"}
-            
-            if meta.count > 0 {
-              let imageData = meta[0].value
-              image = UIImage(data: imageData as! Data)
-            } else {
-              image = UIImage(named: "noImage")
-            }
-            
-            for metaDataItems in asset.commonMetadata {
-              //                    if metaDataItems.commonKey?.rawValue == "title" {
-              //                        guard let titleData = metaDataItems.value else {return}
-              //                        titleString = titleData as? String
-              //                    }
-              if metaDataItems.commonKey?.rawValue == "artist" {
-                guard let artistData = metaDataItems.value else {return}
-                artistString = artistData as? String
+            for name in items {
+              if musicName == name {
+                
+                let url = URL(fileURLWithPath: musicName)
+                let asset = AVAsset(url: url) as AVAsset
+                
+                let meta = asset.commonMetadata.filter
+                { $0.commonKey?.rawValue == "artwork"}
+                
+                if meta.count > 0 {
+                  let imageData = meta[0].value
+                  image = UIImage(data: imageData as! Data)
+                } else {
+                  image = UIImage(named: "noImage")
+                }
+                
+                for metaDataItems in asset.commonMetadata {
+                  //                    if metaDataItems.commonKey?.rawValue == "title" {
+                  //                        guard let titleData = metaDataItems.value else {return}
+                  //                        titleString = titleData as? String
+                  //                    }
+                  if metaDataItems.commonKey?.rawValue == "artist" {
+                    guard let artistData = metaDataItems.value else {return}
+                    artistString = artistData as? String
+                    
+                  }
+                }
+                
+                musicInfo.append(MusicData(cover: image,
+                                           title: musicName,
+                                           artist: artistString,
+                                           musicName: musicName))
                 
               }
             }
-            musicInfo.append(MusicData(cover: image,
-                                       title: musicName,
-                                       artist: artistString,
-                                       musicName: musicName))
+            
+          } catch {
+            print("not Found item")
           }
-          
-        } catch {
-          print("Not Found item")
+          listTableView.reloadData()
         }
-        listTableView.reloadData()
+      }
       
     } else {
       
       musicInfo.removeAll()
-      let list = UserDefaultManager.getMusicList()
-      
-      for item in list! {
-        musicName = item
+
+      do {
+        let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
         
-        do {
-          let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+        for item in items {
+          musicName = item
           
-          for name in items {
-            if musicName == name {
-              
-              let url = URL(fileURLWithPath: musicName)
-              let asset = AVAsset(url: url) as AVAsset
-              
-              let meta = asset.commonMetadata.filter
-              { $0.commonKey?.rawValue == "artwork"}
-              
-              if meta.count > 0 {
-                let imageData = meta[0].value
-                image = UIImage(data: imageData as! Data)
-              } else {
-                image = UIImage(named: "noImage")
-              }
-              
-              for metaDataItems in asset.commonMetadata {
-                //                    if metaDataItems.commonKey?.rawValue == "title" {
-                //                        guard let titleData = metaDataItems.value else {return}
-                //                        titleString = titleData as? String
-                //                    }
-                if metaDataItems.commonKey?.rawValue == "artist" {
-                  guard let artistData = metaDataItems.value else {return}
-                  artistString = artistData as? String
-                  
-                }
-              }
-              
-              musicInfo.append(MusicData(cover: image,
-              title: musicName,
-              artist: artistString,
-              musicName: musicName))
-              
-            }
+          let url = URL(fileURLWithPath: item)
+          let asset = AVAsset(url: url) as AVAsset
+          
+          // artwork image 얻기
+          let metaArtwork = asset.commonMetadata.filter
+          { $0.commonKey?.rawValue == "artwork"}
+          
+          if !metaArtwork.isEmpty {
+            let imageData = metaArtwork[0].value
+            image = UIImage(data: imageData as! Data)
+          } else {
+            image = UIImage(named: "noImage")
           }
-         
-        } catch {
-          print("not Found item")
+          
+          
+          let metaArtist = asset.commonMetadata.filter
+          { $0.commonKey?.rawValue == "artist"}
+          
+          if !metaArtist.isEmpty {
+            artistString = metaArtist[0].value as? String
+          } else {
+            artistString = "작자미상"
+          }
+          
+          
+//          for metaDataItems in asset.commonMetadata {
+//            if metaDataItems.commonKey?.rawValue == "title" {
+//              guard let titleData = metaDataItems.value else {return}
+//              titleString = titleData as? String
+//            }
+//            if metaDataItems.commonKey?.rawValue == "artist" {
+//              guard let artistData = metaDataItems.value else {return }
+//              artistString = artistData as? String
+//
+//            }
+//          }
+          
+          musicInfo.append(MusicData(cover: image,
+                                     title: musicName,
+                                     artist: artistString,
+                                     musicName: musicName))
         }
-        listTableView.reloadData()
-        }
-      
+        
+      } catch {
+        print("Not Found item")
+      }
+      listTableView.reloadData()
       
     }
   

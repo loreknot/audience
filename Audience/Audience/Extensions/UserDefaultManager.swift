@@ -24,4 +24,12 @@ class UserDefaultManager {
   }
   
   
+  static func saveProgressBarStyle(_ style: String?) {
+    defaults.set(style, forKey: "progressBarStyle")
+  }
+  
+  static func getProgressBarStyle() -> String? {
+    return defaults.string(forKey: "StringprogressBarStyle")
+  }
+  
 }

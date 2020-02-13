@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		334E63DA23F4F3C3004BA6B2 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334E63D923F4F3C3004BA6B2 /* SettingViewController.swift */; };
 		3356F47D2385086A00627D0B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3356F47C2385086A00627D0B /* AppDelegate.swift */; };
 		3356F47F2385086A00627D0B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3356F47E2385086A00627D0B /* SceneDelegate.swift */; };
 		3356F4812385086A00627D0B /* PlayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3356F4802385086A00627D0B /* PlayViewController.swift */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		334E63D923F4F3C3004BA6B2 /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
 		3356F4792385086A00627D0B /* Audience.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Audience.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3356F47C2385086A00627D0B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3356F47E2385086A00627D0B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 				3365433D23B1F23300DE1873 /* ListTableViewCell.swift */,
 				3356F4802385086A00627D0B /* PlayViewController.swift */,
 				335E2E56239A3B9C002C7BD1 /* ListViewController.swift */,
+				334E63D923F4F3C3004BA6B2 /* SettingViewController.swift */,
 			);
 			path = VC;
 			sourceTree = "<group>";
@@ -110,7 +113,6 @@
 				E3061AF46E29FCB7A96829B7 /* Pods-Audience.debug.xcconfig */,
 				4B2390F6C86C1646BE2B1D04 /* Pods-Audience.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -133,6 +135,7 @@
 				3356F4752385086A00627D0B /* Sources */,
 				3356F4762385086A00627D0B /* Frameworks */,
 				3356F4772385086A00627D0B /* Resources */,
+				9FE24E240B1F81AC27C9C731 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -212,6 +215,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		9FE24E240B1F81AC27C9C731 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Audience/Pods-Audience-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Audience/Pods-Audience-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Audience/Pods-Audience-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -222,6 +242,7 @@
 				33681B6823B055990015BD6B /* Extension.swift in Sources */,
 				3356F4812385086A00627D0B /* PlayViewController.swift in Sources */,
 				3356F47D2385086A00627D0B /* AppDelegate.swift in Sources */,
+				334E63DA23F4F3C3004BA6B2 /* SettingViewController.swift in Sources */,
 				3356F47F2385086A00627D0B /* SceneDelegate.swift in Sources */,
 				335E2E57239A3B9C002C7BD1 /* ListViewController.swift in Sources */,
 				3365433E23B1F23300DE1873 /* ListTableViewCell.swift in Sources */,
