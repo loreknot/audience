@@ -21,7 +21,7 @@ class PlayViewController: UIViewController {
   @IBOutlet var artistLabel: UILabel!
   @IBOutlet var coverOuterView: UIView!
   
-  @IBOutlet var progressBar: UIProgressView!
+  @IBOutlet var defaultSlider: UISlider!
   @IBOutlet var timeCurrentLabel: UILabel!
   @IBOutlet var timeRemainingLabel: UILabel!
   @IBOutlet var volumeView: UIView!
@@ -48,19 +48,19 @@ class PlayViewController: UIViewController {
   
     listVC = self.tabBarController?.viewControllers![1] as? ListViewController
     
+    
     setFluidSlider()
     setCoverImage()
     setVolumeSlder()
-    
+    setDefalutSlide()
   }
   
   override func viewWillAppear(_ animated: Bool) {
-      
-   
-      loadTimeData()
- 
-     
-      
+  
+    loadTimeData()
+  
+    
+
   }
 
   // MARK: - Action
@@ -123,10 +123,10 @@ class PlayViewController: UIViewController {
   
   func setCoverImage() {
     coverOuterView.layer.cornerRadius = 20
-    coverOuterView.layer.shadowOffset = CGSize(width: 0.0, height: 10)
-    coverOuterView.layer.shadowRadius = 20
+    coverOuterView.layer.shadowOffset = CGSize(width: 0.0, height: 8)
+    coverOuterView.layer.shadowRadius = 10
     coverOuterView.layer.shadowOpacity = 0.4
-    coverOuterView.layer.shadowPath = UIBezierPath(roundedRect: coverImage.bounds, cornerRadius: 20).cgPath
+    //coverOuterView.layer.shadowPath = UIBezierPath(roundedRect: coverImage.bounds, cornerRadius: 20).cgPath
     
     coverImage.layer.cornerRadius = 20
     coverImage.clipsToBounds = true
@@ -147,12 +147,11 @@ class PlayViewController: UIViewController {
     
     
   }
-    
   
   func setJellySlider() {
     
     let uiTintColor = UIColor(hue: 0.6, saturation: 0.35, brightness: 0.8, alpha: 0.8)
-    let sliderFrame = CGRect(x: 50, y: view.bounds.height * 0.5, width:  view.bounds.width * 0.74, height: 40)
+    let sliderFrame = CGRect(x: 50, y: view.bounds.height * 0.5, width:  view.bounds.width * 0.74, height: 20)
     
     jellySlider = JellySlider(frame: sliderFrame)
     jellySlider.trackColor = uiTintColor
@@ -173,36 +172,30 @@ class PlayViewController: UIViewController {
       self.jellySlider.trackColor = adjustedColor
       CATransaction.commit()
       
+//      if let player = self.listVC?.musicPlayer {
+//
+//          let currenTime = CGFloat((player.currentTime))
+//          let duration = CGFloat(player.duration)
+//
+//          let progress = TimeInterval(duration * value )
+//          self.listVC?.musicPlayer!.currentTime = progress
+//
+//        }
+      self.jellySlider.onValueChange?(value)
     }
     
-     
-    
   }
-
-  
   
   func setFluidSlider() {
 
-    let sliderFrame = CGRect(x: 48, y: view.bounds.height * 0.58, width:  view.bounds.width * 0.75, height: 19)
-     
+    let sliderFrame = CGRect(x: 50, y: view.bounds.height * 0.58, width:  view.bounds.width * 0.74, height: 10)
     slider = Slider(frame: sliderFrame)
-    
     slider.sizeToFit()
     view.addSubview(slider)
     
     let labelTextAttributes: [NSAttributedString.Key : Any] = [.font: UIFont.systemFont(ofSize: 12, weight: .medium), .foregroundColor: UIColor.white]
-    
-    if let player = listVC?.musicPlayer {
-    
-      let currenTime = CGFloat((player.currentTime))
-      let duration = CGFloat(player.duration)
-      slider.fraction = currenTime/duration
-      
-      player.currentTime = TimeInterval(slider.fraction/duration)
-    
-    } else {
-      slider.fraction = 0
-    }
+
+    slider.fraction = 0
     
     slider.setMinimumLabelAttributedText(NSAttributedString(string: "", attributes: labelTextAttributes))
     slider.setMaximumLabelAttributedText(NSAttributedString(string: "", attributes: labelTextAttributes))
@@ -210,14 +203,18 @@ class PlayViewController: UIViewController {
     slider.shadowOffset = CGSize(width: 0, height: 10)
     slider.shadowBlur = 5
     slider.shadowColor = UIColor(white: 0, alpha: 0.1)
-    slider.contentViewColor = #colorLiteral(red: 0.4244939621, green: 0.7339108379, blue: 0.5933058707, alpha: 1)
+    slider.contentViewColor = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1)
       //UIColor(red: 78/255.0, green: 77/255.0, blue: 224/255.0, alpha: 1)
     slider.valueViewColor = .white
-    
+    slider.isHidden = true
     
     slider.addTarget(self, action: #selector(sliderValueChanged), for: .valueChanged)
     
-    
+  }
+  
+  func setDefalutSlide() {
+    defaultSlider.value = 0
+    defaultSlider.addTarget(self, action: #selector(sliderDefaultValueChanged), for: .valueChanged)
   }
   
   
@@ -239,9 +236,21 @@ class PlayViewController: UIViewController {
   }
   
   @objc func updateProgressTime()  {
+    
+    if let slider = slider {
       let currenTime = CGFloat((listVC?.musicPlayer!.currentTime)!)
       let duration = CGFloat((listVC?.musicPlayer!.duration)!)
       slider.fraction = currenTime/duration
+    }
+    
+    if !(defaultSlider.isHidden) {
+      if let player = listVC?.musicPlayer {
+        let currenTime = Float((player.currentTime))
+        let duration = Float((player.duration))
+        
+        defaultSlider.value = currenTime/duration
+      }
+    }
     
   }
   
@@ -250,9 +259,16 @@ class PlayViewController: UIViewController {
       let duration = CGFloat((player.duration))
       let progress = TimeInterval(duration * slider.fraction  )
       listVC?.musicPlayer?.currentTime = progress
-
     }
   }
+  
+  @objc func sliderDefaultValueChanged() {
+     if let player = listVC?.musicPlayer {
+       let duration = CGFloat((player.duration))
+      let progress = TimeInterval(duration * CGFloat(defaultSlider.value))
+       listVC?.musicPlayer?.currentTime = progress
+     }
+   }
   
 
     

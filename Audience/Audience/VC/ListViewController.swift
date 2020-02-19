@@ -48,8 +48,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   
   // MARK: - variable
   
-  var musicPlayer: AVAudioPlayer?
+  var musicPlayer: AVAudioPlayer? = AVAudioPlayer()
   var musicInfo = [MusicData]()
+  var musicNameForSave = [String]()
   
   var musicURL: URL?
   var nextMusicURL: URL?
@@ -186,14 +187,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   
   func playViewBottomRadi() {
     
-    let path = UIBezierPath(roundedRect:playView.bounds,
-                            byRoundingCorners:[.bottomLeft, .bottomRight],
-                            cornerRadii: CGSize(width: 7, height:  7))
-    
-    let maskLayer = CAShapeLayer()
-    
-    maskLayer.path = path.cgPath
-    playView.layer.mask = maskLayer
+  playView.clipsToBounds = true
+   playView.layer.cornerRadius = 8
+   playView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
   }
   
   
@@ -253,6 +249,62 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     if let list = UserDefaultManager.getMusicList() {
       
       if list.isEmpty {
+        
+        musicInfo.removeAll()
+
+        do {
+          let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+          
+          for item in items {
+            musicName = item
+            
+            let url = URL(fileURLWithPath: item)
+            let asset = AVAsset(url: url) as AVAsset
+            
+            // artwork image 얻기
+            let metaArtwork = asset.commonMetadata.filter
+            { $0.commonKey?.rawValue == "artwork"}
+            
+            if !metaArtwork.isEmpty {
+              let imageData = metaArtwork[0].value
+              image = UIImage(data: imageData as! Data)
+            } else {
+              image = UIImage(named: "noImage")
+            }
+            
+            
+            let metaArtist = asset.commonMetadata.filter
+            { $0.commonKey?.rawValue == "artist"}
+            
+            if !metaArtist.isEmpty {
+              artistString = metaArtist[0].value as? String
+            } else {
+              artistString = "작자미상"
+            }
+            
+            
+            //          for metaDataItems in asset.commonMetadata {
+            //            if metaDataItems.commonKey?.rawValue == "title" {
+            //              guard let titleData = metaDataItems.value else {return}
+            //              titleString = titleData as? String
+            //            }
+            //            if metaDataItems.commonKey?.rawValue == "artist" {
+            //              guard let artistData = metaDataItems.value else {return }
+            //              artistString = artistData as? String
+            //
+            //            }
+            //          }
+            
+            musicInfo.append(MusicData(cover: image,
+                                       title: musicName,
+                                       artist: artistString,
+                                       musicName: musicName))
+          }
+          
+        } catch {
+          print("Not Found item")
+        }
+        listTableView.reloadData()
         
       } else {
         
@@ -454,6 +506,14 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
   }
   
+   // MARK: - Segue
+  
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    if segue.identifier == "add" {
+      let VC = segue.destination as! AddViewController
+      VC.delegate = self
+    }
+  }
   
   // MARK: - TableView Delegate
   
@@ -521,7 +581,6 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     musicInfo.remove(at: sourceIndexPath.row)
     musicInfo.insert(itemToMove, at: destinationIndexPath.row)
     
-    var musicNameForSave = [String]()
     let data = musicInfo.map { (info) -> String in
       return info.musicName!
       
@@ -530,12 +589,37 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       //      return MusicDataForSave(cover: coverstring, title: mus.title, artist: mus.artist, musicName: mus.musicName)
     }
     
-    
     musicNameForSave = data
     UserDefaultManager.saveMusicList(musicNameForSave)
+  }
+  
+  func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+    true
+  }
+  
+  func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    if editingStyle == .delete {
+      
+      musicInfo.remove(at: indexPath.row)
+      listTableView.reloadData()
+      
+      let data = musicInfo.map { (info) -> String in
+          return info.musicName!
+      }
+      musicNameForSave = data
+      UserDefaultManager.saveMusicList(musicNameForSave)
+    }
+     
   }
   
   
   
   
+}
+
+extension ListViewController: reloadDelegate {
+  func reloadTableView() {
+    loadMusicList()
+  }
+
 }

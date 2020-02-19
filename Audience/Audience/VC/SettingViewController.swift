@@ -33,14 +33,16 @@ class SettingViewController: UITableViewController {
   @IBAction func tapProgressBarStyleButton(_ sender: Any) {
     
     if progressBarStyleButton.selectedSegmentIndex == 0 {
-    //UserDefaultManager.saveProgressBarStyle("fluid")
-      playVC?.setFluidSlider()
+      playVC?.slider.isHidden = true
+      playVC?.defaultSlider.isHidden = false
       
-    
+      
     } else if progressBarStyleButton.selectedSegmentIndex == 1{
-    //UserDefaultManager.saveProgressBarStyle("jelly")
-      playVC?.setJellySlider()
-      playVC?.slider.removeFromSuperview()
+      
+      playVC?.slider.isHidden = false
+      playVC?.defaultSlider.isHidden = true
+      
+      
     }
     
   }
