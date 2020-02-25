@@ -8,7 +8,7 @@
 
 import UIKit
 import AVFoundation
-
+import MediaPlayer
 
 
 struct MusicData {
@@ -56,6 +56,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   var nextMusicURL: URL?
   
   var musicName: String?
+  var coverImage: UIImage?
+  var aritstName: String?
+  
   var forPlayMusicFile: MusicData?
   
   var nowPlaying = false
@@ -76,7 +79,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     listTableView.delegate = self
     listTableView.dataSource = self
     
+
     setNotPlayingLabel()
+    
     
     playVC = self.tabBarController?.viewControllers![0] as? PlayViewController
     
@@ -197,44 +202,44 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     let documentsDir = fileManager.urls(for: .documentDirectory,
                                         in: .userDomainMask)[0].path
-    do {
-      let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
-      for item in items {
-        print("Found : \(item)")
-      }
-    } catch {
-      print("Not Found item")
-    }
     
-    if fileManager.changeCurrentDirectoryPath(documentsDir) {
-      print("Current Path :  \(fileManager.currentDirectoryPath)")
-    } else {
-      print("Fail")
-    }
+    fileManager.changeCurrentDirectoryPath(documentsDir)
   }
   
   
   func playMusic(url: URL) {
+    
+    let session = AVAudioSession.sharedInstance()
+    
+    do {
+      try session.setCategory(AVAudioSession.Category.playback,
+                          mode: .default,
+                          policy: .longFormAudio,
+                          options: [])
+      try session.setActive(true)
+    } catch let error {
+      print(error)
+    }
+    
     
     do {
       musicPlayer = try AVAudioPlayer(contentsOf: url)
   
       musicPlayer?.prepareToPlay()
       musicPlayer?.play()
+      musicPlayer?.delegate = self
       
     } catch {
     }
     
-    //       do {
-    //            try AVAudioSession.sharedInstance().setCategory(.playback,
-    //      mode: .default, options: [.mixWithOthers, .allowAirPlay])
-    //            print("Playback OK")
-    //            try AVAudioSession.sharedInstance().setActive(true)
-    //            print("Session is Active")
-    //        } catch {
-    //            print(error)
-    //        }
+    setupAudioPlayerNotification()
+    setupNowPlaying()
+    updateNowPlaying(isPause: false)
+    
   }
+  
+  
+  
   
   
   func loadMusicList() {
@@ -333,17 +338,26 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
                   image = UIImage(named: "noImage")
                 }
                 
-                for metaDataItems in asset.commonMetadata {
-                  //                    if metaDataItems.commonKey?.rawValue == "title" {
-                  //                        guard let titleData = metaDataItems.value else {return}
-                  //                        titleString = titleData as? String
-                  //                    }
-                  if metaDataItems.commonKey?.rawValue == "artist" {
-                    guard let artistData = metaDataItems.value else {return}
-                    artistString = artistData as? String
-                    
-                  }
-                }
+                let metaArtist = asset.commonMetadata.filter
+                      { $0.commonKey?.rawValue == "artist"}
+                      
+                      if !metaArtist.isEmpty {
+                        artistString = metaArtist[0].value as? String
+                      } else {
+                        artistString = "작자미상"
+                      }
+                
+//                for metaDataItems in asset.commonMetadata {
+//                  if metaDataItems.commonKey?.rawValue == "title" {
+//                    guard let titleData = metaDataItems.value else {return}
+//                    titleString = titleData as? String
+//                  }
+//                  if metaDataItems.commonKey?.rawValue == "artist" {
+//                    guard let artistData = metaDataItems.value else {return}
+//                    artistString = artistData as? String
+//
+//                  }
+//                }
                 
                 musicInfo.append(MusicData(cover: image,
                                            title: musicName,
@@ -506,6 +520,59 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
   }
   
+  
+  func setupAudioPlayerNotification() {
+    
+    let commandCenter = MPRemoteCommandCenter.shared()
+    
+    commandCenter.playCommand.addTarget { [unowned self] event in
+      if self.musicPlayer?.rate == 0.0 {
+        self.musicPlayer?.play()
+        return . success
+      }
+      return . commandFailed
+    }
+    
+    commandCenter.pauseCommand.addTarget { [unowned self] event in
+      if self.musicPlayer?.rate == 1.0 {
+        self.musicPlayer?.pause()
+            return .success
+        }
+        return .commandFailed
+    }
+  }
+  
+  func setupNowPlaying() {
+    
+    var nowPlayingInfo = [String: Any]()
+    nowPlayingInfo[MPMediaItemPropertyTitle] = musicName
+    
+    if let image = coverImage {
+      nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
+        return image
+      }
+    }
+    
+    nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = musicPlayer?.currentTime
+    nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = musicPlayer?.duration
+    nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = musicPlayer?.rate
+    
+    MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    
+    
+  }
+  
+  func updateNowPlaying(isPause: Bool) {
+    
+    var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo
+    
+    nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = musicPlayer?.currentTime
+    nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] = isPause ? 0 : 1
+    
+    MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    
+  }
+  
    // MARK: - Segue
   
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -535,6 +602,8 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       cell.titleLabel.text = model.title
       cell.artistLabel.text = model.artist
     
+     
+    
     return cell
   }
   
@@ -558,6 +627,10 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
       musicURL = musicPath
       
       selectedRow = indexPath.row
+      
+      coverImage = musicInfo[indexPath.row].cover
+      musicName = musicInfo[indexPath.row].musicName
+      aritstName = musicInfo[indexPath.row].artist
       
       playMusic(url: musicURL!)
       choiceMusic = true
@@ -622,4 +695,54 @@ extension ListViewController: reloadDelegate {
     loadMusicList()
   }
 
+}
+
+extension ListViewController: AVAudioPlayerDelegate {
+  
+  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    
+    if flag  {
+
+        if selectedRow! == musicInfo.count - 1 {
+          selectedRow = -1
+        }
+        
+        guard selectedRow! < musicInfo.count - 1 else {return} // 마지막 리스트 일 때
+        
+        
+        selectedRow = selectedRow! + 1
+        listTableView.selectRow(at: IndexPath(row: selectedRow!, section: 0),
+                                animated: true,
+                                scrollPosition: .top)
+        
+        
+        let documentsDir = fileManager.urls(for: .documentDirectory,
+                                            in: .userDomainMask)
+        
+        let nextMusicFile = musicInfo[selectedRow!]
+        let nextMusicName = musicInfo[selectedRow!].musicName
+        let nextMusicCover = musicInfo[selectedRow!].cover
+        
+        toPlayView(nextMusicFile)
+
+        if let documentPath: URL = documentsDir.first {
+          let nextMusicPath = documentPath.appendingPathComponent(nextMusicName!)
+          
+          nextMusicURL = nextMusicPath
+          
+          if nowPlaying == true {
+            
+            playMusic(url: nextMusicURL!)
+            
+            setNowPlayingAnimation()
+            playViewLabel.text = nextMusicName
+            playViewCoverImage.image = nextMusicCover
+          }
+        }
+      }
+      
+      
+    }
+  
+  
 }

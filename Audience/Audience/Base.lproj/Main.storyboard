@@ -28,7 +28,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jG8-sd-5Js">
-                                        <rect key="frame" x="50" y="393" width="314" height="20"/>
+                                        <rect key="frame" x="50" y="390" width="314" height="20"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="JBW-r6-PIc"/>
                                         </constraints>
@@ -43,11 +43,17 @@
                                                 <rect key="frame" x="268.5" y="9" width="45.5" height="33"/>
                                                 <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" backgroundImage="forward.fill" catalog="system"/>
+                                                <connections>
+                                                    <action selector="tapSecondTimeNextButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="f5n-3A-obz"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vaX-PZ-bVA">
                                                 <rect key="frame" x="0.0" y="9" width="45.5" height="33"/>
                                                 <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" backgroundImage="backward.fill" catalog="system"/>
+                                                <connections>
+                                                    <action selector="tapSecondTimePreviousButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="GlU-Za-H8O"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="R1N-sh-0ax">
                                                 <rect key="frame" x="186" y="2" width="74.5" height="47"/>
@@ -55,13 +61,16 @@
                                                 <state key="normal" backgroundImage="forward.fill" catalog="system">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </state>
+                                                <connections>
+                                                    <action selector="tapFirstTimeNextButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="W5F-aV-FoX"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dA3-zi-54Z">
                                                 <rect key="frame" x="53.5" y="2" width="74.5" height="47"/>
                                                 <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" backgroundImage="backward.fill" catalog="system"/>
                                                 <connections>
-                                                    <action selector="firstTimePreviousButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UFZ-2v-34M"/>
+                                                    <action selector="tapFirstTimePreviousButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UFZ-2v-34M"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -106,11 +115,17 @@
                                                 <fontDescription key="fontDescription" type="system" pointSize="19"/>
                                                 <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" backgroundImage="backward.end.fill" catalog="system"/>
+                                                <connections>
+                                                    <action selector="tapPreviousButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="fPJ-gG-HMP"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0SX-Vd-L8J">
                                                 <rect key="frame" x="190" y="17" width="58" height="49.5"/>
                                                 <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <state key="normal" backgroundImage="forward.end.fill" catalog="system"/>
+                                                <connections>
+                                                    <action selector="tapNextButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Lwp-XA-PCm"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
@@ -169,7 +184,7 @@
                                         </constraints>
                                     </view>
                                     <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="IkS-Dd-Vc7">
-                                        <rect key="frame" x="48" y="462" width="318" height="31"/>
+                                        <rect key="frame" x="48" y="465.5" width="318" height="31"/>
                                         <color key="tintColor" systemColor="systemGrayColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     </slider>
                                 </subviews>
@@ -185,12 +200,12 @@
                                     <constraint firstItem="sKN-Lt-SzG" firstAttribute="leading" secondItem="Lgf-GT-MNE" secondAttribute="leading" constant="50" id="IRA-RK-Has"/>
                                     <constraint firstItem="IkS-Dd-Vc7" firstAttribute="leading" secondItem="Lgf-GT-MNE" secondAttribute="leading" constant="50" id="NMq-b3-cMj"/>
                                     <constraint firstItem="Wzo-dQ-48X" firstAttribute="top" secondItem="EpF-tA-o1m" secondAttribute="bottom" constant="8" symbolic="YES" id="QMm-6Q-jZw"/>
-                                    <constraint firstItem="IkS-Dd-Vc7" firstAttribute="centerY" secondItem="Lgf-GT-MNE" secondAttribute="centerY" multiplier="1.24" id="RtQ-Wg-sLe"/>
+                                    <constraint firstItem="IkS-Dd-Vc7" firstAttribute="centerY" secondItem="Lgf-GT-MNE" secondAttribute="centerY" multiplier="1.25" id="RtQ-Wg-sLe"/>
                                     <constraint firstAttribute="trailing" secondItem="9j9-Nm-Mih" secondAttribute="trailing" constant="50.5" id="Vdp-eY-ggB"/>
                                     <constraint firstItem="Bue-oa-XkU" firstAttribute="centerX" secondItem="Lgf-GT-MNE" secondAttribute="centerX" id="Vls-yU-ely"/>
                                     <constraint firstAttribute="right" secondItem="jG8-sd-5Js" secondAttribute="right" constant="50" id="Wd0-4N-PJ0"/>
                                     <constraint firstItem="EpF-tA-o1m" firstAttribute="top" secondItem="Lgf-GT-MNE" secondAttribute="top" constant="35" id="XOK-lz-kRQ"/>
-                                    <constraint firstItem="jG8-sd-5Js" firstAttribute="top" secondItem="Wzo-dQ-48X" secondAttribute="bottom" constant="8" id="Yis-q7-BfL"/>
+                                    <constraint firstItem="jG8-sd-5Js" firstAttribute="top" secondItem="Wzo-dQ-48X" secondAttribute="bottom" constant="5" id="Yis-q7-BfL"/>
                                     <constraint firstAttribute="trailing" secondItem="Bue-oa-XkU" secondAttribute="trailing" constant="83" id="ZD8-b6-LG5"/>
                                     <constraint firstItem="Q9D-OH-mgL" firstAttribute="centerX" secondItem="Lgf-GT-MNE" secondAttribute="centerX" id="a1e-XF-5bW"/>
                                     <constraint firstItem="Bue-oa-XkU" firstAttribute="centerY" secondItem="Lgf-GT-MNE" secondAttribute="centerY" multiplier="1.81" id="dJV-dY-GjR"/>
@@ -262,7 +277,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="43.666667938232422"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <segmentedControl opaque="NO" contentMode="scaleToFill" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" translatesAutoresizingMaskIntoConstraints="NO" id="gbN-gu-bw9">
+                                                <segmentedControl opaque="NO" contentMode="scaleToFill" selected="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="gbN-gu-bw9">
                                                     <rect key="frame" x="227" y="6" width="149" height="32"/>
                                                     <segments>
                                                         <segment title="defalut"/>
@@ -379,14 +394,16 @@
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zev-1X-VfV">
                                 <rect key="frame" x="218.5" y="758" width="165.5" height="38"/>
-                                <state key="normal" title="☑️"/>
+                                <state key="normal" title="Yeah"/>
                                 <connections>
                                     <action selector="tapAddButton:" destination="RFe-mF-Ps8" eventType="touchUpInside" id="8as-V8-SCu"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vSJ-3d-Z2f">
                                 <rect key="frame" x="30" y="758" width="188.5" height="38"/>
-                                <state key="normal" title="❌"/>
+                                <state key="normal" title="Nope">
+                                    <color key="titleColor" systemColor="systemPinkColor" red="1" green="0.1764705882" blue="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
                             </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>

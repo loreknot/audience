@@ -48,11 +48,16 @@ class PlayViewController: UIViewController {
   
     listVC = self.tabBarController?.viewControllers![1] as? ListViewController
     
-    
+    coverImage.image = #imageLiteral(resourceName: "icon")
+    titleLabel.text = "Welcome"
+    artistLabel.text = "Audience"
+
     setFluidSlider()
     setCoverImage()
     setVolumeSlder()
     setDefalutSlide()
+    
+    
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -98,13 +103,127 @@ class PlayViewController: UIViewController {
     
   }
   
-  @IBAction func firstTimePreviousButton(_ sender: Any) {
-    
+  @IBAction func tapFirstTimePreviousButton(_ sender: Any) {
     listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - 5
+  }
+  
+  @IBAction func tapSecondTimePreviousButton(_ sender: Any) {
+    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - 10
+  }
+  
+  @IBAction func tapFirstTimeNextButton(_ sender: Any) {
+    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + 5
+  }
+  
+  @IBAction func tapSecondTimeNextButton(_ sender: Any) {
+    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + 10
+  }
+  
+  @IBAction func tapPreviousButton(_ sender: Any) {
+    
+    guard listVC!.choiceMusic else {return}
+    
+    if listVC?.selectedRow! == 0 {
+      listVC?.selectedRow = listVC?.musicInfo.count
+    }
+    guard  (listVC?.selectedRow!)! <  (listVC?.musicInfo.count)! + 1 else {return}
+    
+    
+    listVC?.selectedRow =  (listVC?.selectedRow!)! - 1
+    listVC?.listTableView.selectRow(at: IndexPath(row:  (listVC?.selectedRow!)!, section: 0),
+                            animated: true,
+                            scrollPosition: .top)
+    
+    
+    let documentsDir =  listVC?.fileManager.urls(for: .documentDirectory,
+                                        in: .userDomainMask)
+    
+    let nextMusicFile =  listVC?.musicInfo[ (listVC?.selectedRow!)!]
+    let nextMusicName =  listVC?.musicInfo[ (listVC?.selectedRow!)!].musicName
+    let nextMusicCover =  listVC?.musicInfo[ (listVC?.selectedRow!)!].cover
+    
+    listVC?.toPlayView(nextMusicFile!)
+
+    if let documentPath: URL = documentsDir?.first {
+      let nextMusicPath = documentPath.appendingPathComponent(nextMusicName!)
+      
+       listVC?.nextMusicURL = nextMusicPath
+      
+      if  listVC?.nowPlaying == true {
+        
+        listVC?.playMusic(url: (listVC?.nextMusicURL!)!)
+        
+         listVC?.setNowPlayingAnimation()
+         listVC?.playViewLabel.text = nextMusicName
+        listVC?.playViewCoverImage.image = nextMusicCover
+        
+      } else {
+        
+         listVC?.musicName = nextMusicName
+         listVC?.playViewCoverImage.image = nextMusicCover
+    
+         listVC?.playMusic(url: (listVC?.nextMusicURL!)!)
+         listVC?.musicPlayer?.stop()
+        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
+        //                                      for: .normal)
+      }
+      
+    }
+
     
   }
   
-  
+  @IBAction func tapNextButton(_ sender: Any) {
+    
+    guard listVC!.choiceMusic else {return}
+    
+    if listVC?.selectedRow! == (listVC?.musicInfo.count)! - 1 {
+       listVC?.selectedRow = -1
+    }
+    guard  (listVC?.selectedRow!)! <  (listVC?.musicInfo.count)! - 1 else {return} // 마지막 리스트 일 때
+    
+    
+    listVC?.selectedRow =  (listVC?.selectedRow!)! + 1
+    listVC?.listTableView.selectRow(at: IndexPath(row:  (listVC?.selectedRow!)!, section: 0),
+                            animated: true,
+                            scrollPosition: .top)
+    
+    
+    let documentsDir =  listVC?.fileManager.urls(for: .documentDirectory,
+                                        in: .userDomainMask)
+    
+    let nextMusicFile =  listVC?.musicInfo[ (listVC?.selectedRow!)!]
+    let nextMusicName =  listVC?.musicInfo[ (listVC?.selectedRow!)!].musicName
+    let nextMusicCover =  listVC?.musicInfo[ (listVC?.selectedRow!)!].cover
+    
+    listVC?.toPlayView(nextMusicFile!)
+
+    if let documentPath: URL = documentsDir?.first {
+      let nextMusicPath = documentPath.appendingPathComponent(nextMusicName!)
+      
+       listVC?.nextMusicURL = nextMusicPath
+      
+      if  listVC?.nowPlaying == true {
+        
+        listVC?.playMusic(url: (listVC?.nextMusicURL!)!)
+        
+         listVC?.setNowPlayingAnimation()
+         listVC?.playViewLabel.text = nextMusicName
+        listVC?.playViewCoverImage.image = nextMusicCover
+        
+      } else {
+        
+         listVC?.musicName = nextMusicName
+         listVC?.playViewCoverImage.image = nextMusicCover
+    
+         listVC?.playMusic(url: (listVC?.nextMusicURL!)!)
+         listVC?.musicPlayer?.stop()
+        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
+        //                                      for: .normal)
+      }
+      
+    }
+  }
   
   // MARK: - func
   
@@ -132,7 +251,7 @@ class PlayViewController: UIViewController {
     coverImage.clipsToBounds = true
   }
   
-  func convertTimeInterval(_ time: TimeInterval) -> String {
+  static func convertTimeInterval(_ time: TimeInterval) -> String {
     let min = Int(time/60)
     let sec = Int(time.truncatingRemainder(dividingBy: 60))
     let strTime = String(format: "%02d:%02d", min, sec)
@@ -219,12 +338,13 @@ class PlayViewController: UIViewController {
   
   
   
+  
 
   
   // MARK: - Selector
   
   @objc func updateCurrentTime() {
-    timeCurrentLabel.text = convertTimeInterval((listVC?.musicPlayer!.currentTime)!)
+    timeCurrentLabel.text = PlayViewController.convertTimeInterval((listVC?.musicPlayer!.currentTime)!)
   }
   
   @objc func updateRemainingTime() {
@@ -232,7 +352,7 @@ class PlayViewController: UIViewController {
     let curretTime = Int((listVC?.musicPlayer!.currentTime)!)
     let ramainingTime = TimeInterval(duration - curretTime)
     
-    timeRemainingLabel.text = "-" + convertTimeInterval(ramainingTime)
+    timeRemainingLabel.text = "-" + PlayViewController.convertTimeInterval(ramainingTime)
   }
   
   @objc func updateProgressTime()  {
