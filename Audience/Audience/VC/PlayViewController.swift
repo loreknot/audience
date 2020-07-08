@@ -9,7 +9,6 @@
 import UIKit
 import AVKit
 import MediaPlayer
-import JellySlider
 import fluid_slider
 
 class PlayViewController: UIViewController {
@@ -34,13 +33,7 @@ class PlayViewController: UIViewController {
   var progressTimer: Timer!
   
   var listVC: ListViewController?
-  
-  let currentTimeSelector: Selector = #selector(PlayViewController.updateCurrentTime)
-  let remainingTimeSelector: Selector =  #selector(PlayViewController.updateRemainingTime)
-  let progressTimeSelector: Selector =  #selector(PlayViewController.updateProgressTime)
-
   var slider: Slider!
-  var jellySlider: JellySlider!
   
   // MARK: - Cycle
   override func viewDidLoad() {
@@ -57,7 +50,7 @@ class PlayViewController: UIViewController {
     setVolumeSlder()
     setDefalutSlide()
     
-    
+    setLastMusicInfo()
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -100,27 +93,42 @@ class PlayViewController: UIViewController {
         listVC?.playViewLabel.text = name
       }
     }
-    
   }
   
   @IBAction func tapFirstTimePreviousButton(_ sender: Any) {
-    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - 5
+    if let second = UserDefaultManager.getBigIconJumpValue() {
+      listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - TimeInterval(second)
+    } else {
+      listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - 5
+    }
   }
   
   @IBAction func tapSecondTimePreviousButton(_ sender: Any) {
-    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - 10
-  }
+    if let second = UserDefaultManager.getSmallIconJumpValue() {
+        listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - TimeInterval(second)
+      } else {
+        listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! - 10
+      }
+    }
+    
   
   @IBAction func tapFirstTimeNextButton(_ sender: Any) {
-    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + 5
+    if let second = UserDefaultManager.getBigIconJumpValue() {
+      listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + TimeInterval(second)
+    } else {
+      listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + 5
+    }
   }
   
   @IBAction func tapSecondTimeNextButton(_ sender: Any) {
-    listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + 10
+     if let second = UserDefaultManager.getSmallIconJumpValue() {
+         listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + TimeInterval(second)
+       } else {
+         listVC?.musicPlayer?.currentTime = (listVC?.musicPlayer!.currentTime)! + 10
+    }
   }
   
   @IBAction func tapPreviousButton(_ sender: Any) {
-    
     guard listVC!.choiceMusic else {return}
     
     if listVC?.selectedRow! == 0 {
@@ -141,6 +149,7 @@ class PlayViewController: UIViewController {
     let nextMusicFile =  listVC?.musicInfo[ (listVC?.selectedRow!)!]
     let nextMusicName =  listVC?.musicInfo[ (listVC?.selectedRow!)!].musicName
     let nextMusicCover =  listVC?.musicInfo[ (listVC?.selectedRow!)!].cover
+    UserDefaultManager.saveLastPlayMusic(list: nextMusicName!)
     
     listVC?.toPlayView(nextMusicFile!)
 
@@ -195,6 +204,7 @@ class PlayViewController: UIViewController {
     let nextMusicFile =  listVC?.musicInfo[ (listVC?.selectedRow!)!]
     let nextMusicName =  listVC?.musicInfo[ (listVC?.selectedRow!)!].musicName
     let nextMusicCover =  listVC?.musicInfo[ (listVC?.selectedRow!)!].cover
+    UserDefaultManager.saveLastPlayMusic(list: nextMusicName!)
     
     listVC?.toPlayView(nextMusicFile!)
 
@@ -227,15 +237,25 @@ class PlayViewController: UIViewController {
   
   // MARK: - func
   
+  func timeSelector(type: String) -> Selector {
+    if type == "current" {
+      return #selector(PlayViewController.updateCurrentTime)
+    } else if type == "remaining" {
+      return  #selector(PlayViewController.updateRemainingTime)
+    } else if type == "progress" {
+      return  #selector(PlayViewController.updateProgressTime)
+    }
+    return #selector(PlayViewController.updateCurrentTime)
+  }
   
   
   func loadTimeData() {
     
     if let player = listVC?.musicPlayer {
       if player.isPlaying {
-        progressTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: currentTimeSelector, userInfo: nil, repeats: true)
-        progressTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: remainingTimeSelector, userInfo: nil, repeats: true)
-        progressTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: progressTimeSelector, userInfo: nil, repeats: true)
+        progressTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: timeSelector(type: "current"), userInfo: nil, repeats: true)
+        progressTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: timeSelector(type: "remaining"), userInfo: nil, repeats: true)
+        progressTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: timeSelector(type: "progress"), userInfo: nil, repeats: true)
       }
     }
   }
@@ -245,7 +265,6 @@ class PlayViewController: UIViewController {
     coverOuterView.layer.shadowOffset = CGSize(width: 0.0, height: 8)
     coverOuterView.layer.shadowRadius = 10
     coverOuterView.layer.shadowOpacity = 0.4
-    //coverOuterView.layer.shadowPath = UIBezierPath(roundedRect: coverImage.bounds, cornerRadius: 20).cgPath
     
     coverImage.layer.cornerRadius = 20
     coverImage.clipsToBounds = true
@@ -263,47 +282,9 @@ class PlayViewController: UIViewController {
     let volumeBar = MPVolumeView(frame: volumeView.bounds)
     volumeView.addSubview(volumeBar)
     volumeView.tintColor = #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1)
-    
-    
   }
   
-  func setJellySlider() {
-    
-    let uiTintColor = UIColor(hue: 0.6, saturation: 0.35, brightness: 0.8, alpha: 0.8)
-    let sliderFrame = CGRect(x: 50, y: view.bounds.height * 0.5, width:  view.bounds.width * 0.74, height: 20)
-    
-    jellySlider = JellySlider(frame: sliderFrame)
-    jellySlider.trackColor = uiTintColor
-    jellySlider.sizeToFit()
-    view.addSubview(jellySlider)
-    
-    jellySlider.onValueChange = { value in
-      var hue: CGFloat = 0
-      var sat: CGFloat = 0
-      var bri: CGFloat = 0
-      var alp: CGFloat = 0
-      uiTintColor.getHue(&hue, saturation: &sat, brightness: &bri, alpha: &alp)
-      
-      let adjustedColor = UIColor(hue: value/1, saturation: sat, brightness: bri, alpha: alp)
   
-      CATransaction.begin()
-      CATransaction.setValue(true, forKey: kCATransactionDisableActions)
-      self.jellySlider.trackColor = adjustedColor
-      CATransaction.commit()
-      
-//      if let player = self.listVC?.musicPlayer {
-//
-//          let currenTime = CGFloat((player.currentTime))
-//          let duration = CGFloat(player.duration)
-//
-//          let progress = TimeInterval(duration * value )
-//          self.listVC?.musicPlayer!.currentTime = progress
-//
-//        }
-      self.jellySlider.onValueChange?(value)
-    }
-    
-  }
   
   func setFluidSlider() {
 
@@ -336,6 +317,80 @@ class PlayViewController: UIViewController {
     defaultSlider.addTarget(self, action: #selector(sliderDefaultValueChanged), for: .valueChanged)
   }
   
+  func setLastMusicInfo() {
+    
+    let documentsDir =  listVC?.fileManager.urls(for: .documentDirectory,
+      in: .userDomainMask)[0].path
+    var image: UIImage!
+    var artistString: String!
+    var musicName: String!
+    
+    if let list = UserDefaultManager.getMusicList() {
+      for item in list {
+                musicName = item
+                
+                do {
+                  let items = try listVC?.fileManager.contentsOfDirectory(atPath: documentsDir!)
+                  
+                  for name in items! {
+                    if musicName == name {
+                      
+                      let url = URL(fileURLWithPath: musicName)
+                      let asset = AVAsset(url: url) as AVAsset
+                      
+                      let meta = asset.commonMetadata.filter
+                      { $0.commonKey?.rawValue == "artwork"}
+                      
+                      if meta.count > 0 {
+                        let imageData = meta[0].value
+                        image = UIImage(data: imageData as! Data)
+                      } else {
+                        image = UIImage(named: "noImage")
+                      }
+                      
+                      let metaArtist = asset.commonMetadata.filter
+                            { $0.commonKey?.rawValue == "artist"}
+                      
+                      if !metaArtist.isEmpty {
+                        artistString = metaArtist[0].value as? String
+                      } else {
+                        artistString = "작자미상"
+                      }
+                      
+                      listVC?.musicInfo.append(MusicData(cover: image,
+                                                 title: musicName,
+                                                 artist: artistString,
+                                                 musicName: musicName))
+                    }
+                  }
+                  
+                } catch {
+                  print("not Found item")
+                }
+                
+      }
+    }
+      
+    
+    if let lastMusic = UserDefaultManager.getLastPlayMusic() {
+      print(listVC?.musicInfo)
+//       let info = last![0]
+//
+//      coverImage.image = info.cover
+//      titleLabel.text = info.title
+//      artistLabel.text = info.artist
+//
+        
+       
+      
+//      if let path = documentsDir?.first {
+//        let musicURL = path.appendingPathComponent(lastMusic)
+//
+//        listVC?.musicPlayer?.currentTime = 60
+//
+//      }
+    }
+  }
   
   
   

@@ -79,12 +79,9 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     listTableView.delegate = self
     listTableView.dataSource = self
     
-
     setNotPlayingLabel()
     
-    
     playVC = self.tabBarController?.viewControllers![0] as? PlayViewController
-    
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -151,6 +148,8 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     let nextMusicFile = musicInfo[selectedRow!]
     let nextMusicName = musicInfo[selectedRow!].musicName
+    UserDefaultManager.saveLastPlayMusic(list: nextMusicName!)
+    
     let nextMusicCover = musicInfo[selectedRow!].cover
     
     toPlayView(nextMusicFile)
@@ -252,9 +251,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     var musicName: String!
 
     if let list = UserDefaultManager.getMusicList() {
-      
       if list.isEmpty {
-        
         musicInfo.removeAll()
 
         do {
@@ -305,7 +302,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
                                        artist: artistString,
                                        musicName: musicName))
           }
-          
+         
         } catch {
           print("Not Found item")
         }
@@ -614,6 +611,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     let musicFile = musicInfo[indexPath.row]
     
     musicName = musicFile.musicName
+    UserDefaultManager.saveLastPlayMusic(list: musicName!)
     
     playViewLabel.text = musicFile.musicName
     playViewCoverImage.image = musicFile.cover
