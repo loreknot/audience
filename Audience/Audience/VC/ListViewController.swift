@@ -127,6 +127,7 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
   
   @IBAction func nextButton(_ sender: Any) {
     
+    
     guard choiceMusic else {return}
     
     
@@ -522,6 +523,16 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
     
     let commandCenter = MPRemoteCommandCenter.shared()
     
+    commandCenter.pauseCommand.addTarget { [unowned self] event in
+      self.musicPlayer?.pause()
+      return .success
+    }
+    
+    commandCenter.playCommand.addTarget { [unowned self] event in
+      self.musicPlayer?.play()
+      return .success
+    }
+    
     commandCenter.playCommand.addTarget { [unowned self] event in
       if self.musicPlayer?.rate == 0.0 {
         self.musicPlayer?.play()
@@ -537,6 +548,8 @@ class ListViewController: UIViewController, UITableViewDelegate,UITableViewDataS
         }
         return .commandFailed
     }
+    
+   
   }
   
   func setupNowPlaying() {

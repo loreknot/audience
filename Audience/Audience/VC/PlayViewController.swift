@@ -31,6 +31,7 @@ class PlayViewController: UIViewController {
   
   // MARK: - Variable
   var progressTimer: Timer!
+  var fileManager = FileManager.default
   
   var listVC: ListViewController?
   var slider: Slider!
@@ -49,16 +50,13 @@ class PlayViewController: UIViewController {
     setCoverImage()
     setVolumeSlder()
     setDefalutSlide()
-    
-    setLastMusicInfo()
+
   }
   
   override func viewWillAppear(_ animated: Bool) {
   
     loadTimeData()
   
-    
-
   }
 
   // MARK: - Action
@@ -131,6 +129,7 @@ class PlayViewController: UIViewController {
   @IBAction func tapPreviousButton(_ sender: Any) {
     guard listVC!.choiceMusic else {return}
     
+    
     if listVC?.selectedRow! == 0 {
       listVC?.selectedRow = listVC?.musicInfo.count
     }
@@ -173,8 +172,7 @@ class PlayViewController: UIViewController {
     
          listVC?.playMusic(url: (listVC?.nextMusicURL!)!)
          listVC?.musicPlayer?.stop()
-        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
-        //                                      for: .normal)
+        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),for: .normal)
       }
       
     }
@@ -228,8 +226,7 @@ class PlayViewController: UIViewController {
     
          listVC?.playMusic(url: (listVC?.nextMusicURL!)!)
          listVC?.musicPlayer?.stop()
-        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),
-        //                                      for: .normal)
+        //        playButton.setBackgroundImage(UIImage(systemName: "pause.fill"),for: .normal)
       }
       
     }
@@ -319,76 +316,74 @@ class PlayViewController: UIViewController {
   
   func setLastMusicInfo() {
     
-    let documentsDir =  listVC?.fileManager.urls(for: .documentDirectory,
-      in: .userDomainMask)[0].path
+    let documentsDir = fileManager.urls(for: .documentDirectory,
+                                        in: .userDomainMask)[0].path
+    fileManager.changeCurrentDirectoryPath(documentsDir)
+    
     var image: UIImage!
     var artistString: String!
     var musicName: String!
     
     if let list = UserDefaultManager.getMusicList() {
       for item in list {
-                musicName = item
-                
-                do {
-                  let items = try listVC?.fileManager.contentsOfDirectory(atPath: documentsDir!)
-                  
-                  for name in items! {
-                    if musicName == name {
-                      
-                      let url = URL(fileURLWithPath: musicName)
-                      let asset = AVAsset(url: url) as AVAsset
-                      
-                      let meta = asset.commonMetadata.filter
-                      { $0.commonKey?.rawValue == "artwork"}
-                      
-                      if meta.count > 0 {
-                        let imageData = meta[0].value
-                        image = UIImage(data: imageData as! Data)
-                      } else {
-                        image = UIImage(named: "noImage")
-                      }
-                      
-                      let metaArtist = asset.commonMetadata.filter
-                            { $0.commonKey?.rawValue == "artist"}
-                      
-                      if !metaArtist.isEmpty {
-                        artistString = metaArtist[0].value as? String
-                      } else {
-                        artistString = "작자미상"
-                      }
-                      
-                      listVC?.musicInfo.append(MusicData(cover: image,
+        musicName = item
+        
+        
+        do {
+          let items = try fileManager.contentsOfDirectory(atPath: documentsDir)
+          
+          for name in items {
+            if musicName == name {
+              
+              let url = URL(fileURLWithPath: name)
+              let asset = AVAsset(url: url) as AVAsset
+              
+              let meta = asset.commonMetadata.filter
+              { $0.commonKey?.rawValue == "artwork"}
+              
+              if meta.count > 0 {
+                let imageData = meta[0].value
+                image = UIImage(data: imageData as! Data)
+              } else {
+                image = UIImage(named: "noImage")
+              }
+              
+              let metaArtist = asset.commonMetadata.filter
+              { $0.commonKey?.rawValue == "artist"}
+              
+              if !metaArtist.isEmpty {
+                artistString = metaArtist[0].value as? String
+              } else {
+                artistString = "작자미상"
+              }
+              
+              listVC?.musicInfo.append(MusicData(cover: image,
                                                  title: musicName,
                                                  artist: artistString,
                                                  musicName: musicName))
-                    }
-                  }
-                  
-                } catch {
-                  print("not Found item")
-                }
-                
+            }
+          }
+          
+        } catch {
+          print("not Found item")
+        }
+        
       }
     }
-      
+    
     
     if let lastMusic = UserDefaultManager.getLastPlayMusic() {
-      print(listVC?.musicInfo)
-//       let info = last![0]
-//
-//      coverImage.image = info.cover
-//      titleLabel.text = info.title
-//      artistLabel.text = info.artist
-//
-        
-       
+      let last = listVC?.musicInfo.filter { $0.musicName == lastMusic }
+      let info = last?.first
       
-//      if let path = documentsDir?.first {
-//        let musicURL = path.appendingPathComponent(lastMusic)
-//
-//        listVC?.musicPlayer?.currentTime = 60
-//
-//      }
+      coverImage.image = info?.cover
+      titleLabel.text = info?.title
+      artistLabel.text = info?.artist
+      
+      if let path: URL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
+        let musicURL = path.appendingPathComponent(lastMusic)
+        listVC?.playMusic(url: musicURL)
+      }
     }
   }
   
